@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         STUDENT_ID = 'FA23-BDS-032'
-        IMAGE      = 'nazirahmed72/ml-api-fa23-bds-032'
+        IMAGE      = 'ml-api'
         CONTAINER  = 'ml-api'
         NOTIFY_TO  = 'qasimalik@gmail.com'
     }
@@ -55,21 +55,7 @@ pipeline {
 
         stage('Build Docker image') {
             steps {
-                sh 'docker build -t $IMAGE:latest -t $IMAGE:build-$BUILD_NUMBER .'
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub',
-                                 usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
-                    sh '''
-                        echo "$DH_TOKEN" | docker login -u "$DH_USER" --password-stdin
-                        docker push $IMAGE:latest
-                        docker push $IMAGE:build-$BUILD_NUMBER
-                        docker logout
-                    '''
-                }
+                sh 'docker build -t $IMAGE:latest .'
             }
         }
 
@@ -100,13 +86,13 @@ Job: ${env.JOB_NAME} #${env.BUILD_NUMBER}
 Result: ${currentBuild.currentResult}
 Commit: ${env.GIT_COMMIT}
 Build URL: ${env.BUILD_URL}
-Docker image: ${env.IMAGE}:latest
 
 Metrics:
 ${m}
 """
                 )
             }
+            sh 'docker image prune -f || true'
         }
     }
 }
